@@ -6,14 +6,23 @@ const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
 
 router.post("/", async (req, res) => {
-  const { nickname, password } = req.body;
+  const { nickname, password, ip } = req.body;
 
   //Check for existing user
   const user = await User.findOne({ nickname: nickname });
-  if (!user) return res.status(400).json({ msg: "User does not exists" });
+  
+  if (!user) { return res.status(400).json({ msg: "User does not exists" }); }
+  else if (!ip) { return res.status(400).json({ msg: "Invalid Ip" }); }
+
   //Validate password
-  bcrypt.compare(password, user.password).then((isMatch) => {
+  bcrypt.compare(password, user.password).then(async (isMatch) => {
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials!" });
+
+    const existingIp = user.ips.find(item => item === ip);
+
+    if (!existingIp) {
+      await User.updateOne({ _id: user._id }, { ips: [...user.ips, ip] })
+    }
 
     jwt.sign(
       {

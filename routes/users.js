@@ -10,7 +10,7 @@ dotenv.config();
 
 router.post("/", async (req, res) => {
 
-   const { nickname, email, password } = req.body;
+   const { nickname, email, password, ip } = req.body;
    //Simple validation
    if (!nickname) {
       return res.status(400).json({ msg: "Please enter your username!" });
@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
       }
    }
 
-   const user = new User({ nickname, email, password });
+   const user = new User({ nickname, email, password, ips: [ip] });
    //Create salt & hash
    bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(user.password, salt, (err, hash) => {
