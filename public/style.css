@@ -1,0 +1,41 @@
+/* canvas {
+    width: 600px;
+    height: 600px;
+    border: 1px solid #000;
+} */
+
+body {
+    font-family: "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+        "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+.wrapper {
+    display: flex;
+    position: relative;
+}
+
+#pointer-position {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    font-weight: 500;
+    font-size: 18px;
+    color: #fff;
+    opacity: 0.5;
+    background-color: #000;
+}
+
+#container {
+    border: 1px solid #000;
+    width: 700px;
+    height: 700px;
+}
+
+#object-data {
+    padding: 12px;
+}
+
+h4 {
+    margin: 8px 0 6px 0;
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <title>Document</title>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div id="pointer-position"></div>
+            <div id="container"></div>
+            <div id="object-data"></div>
+            <div class="manual">
+                <input id="x" type="number" placeholder="dimension X">
+                <input id="y" type="number" placeholder="dimension Y">
+                <button onclick="createMatrix()">Create template</button>
+                <button onclick="stageSetDefault()">Reset</button>
+                <!-- <ul>
+                    <li>Перемещение по карте -> Mouse Down (ЛКМ)</li>
+                    <li>
+                        Изменение масштаба карты -> Mouse Wheel (Колесо мыши)
+                    </li>
+                    <li>
+                        Красным контуром обведены участки, владелец которых
+                        мёртв
+                    </li>
+                    <li>Зеленый цвет - занятые участки</li>
+                    <li>Сервый цвет - свободные участки</li>
+                    <li>
+                        При наведении на участок, справа от карты отображается
+                        информация о нём
+                    </li>
+                    <li>
+                        В левом углу карты указано текущее местоположение
+                        курсора (по сути координаты блока)
+                    </li>
+                </ul> -->
+            </div>
+        </div>
+        <script>
+            document.getElementById("container").addEventListener("contextmenu", e => e.preventDefault())
+        </script>
+        <script src="https://unpkg.com/konva@8/konva.min.js"></script>
+        <script type="text/javascript" src="./script.js"></script>
+    </body>
+</html>
