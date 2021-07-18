@@ -13,6 +13,7 @@ dotenv.config();
 app.use(express.json({ extended: true }));
 app.use("/api/auth", require("./routes/authorization"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/templates", require("./routes/templates"));
 
 app.use("/map", express.static(path.join(__dirname, "public")));
 

@@ -9,13 +9,18 @@ const MAX_SCALE = 10 //CANVAS_SIZE / (CELL_SIZE * 25); // where 10 is width/heig
 const palette = {
     default: "#909090",
     selected: "#388D0D",
+    guildhall: "#CF0404",
+    wall: "#0445CF",
+    arena: "#6C00C1",
+    warehouse: "#DAD300",
+    smithy: "#000526"
 }
 
 class Cell {
     x;
     y;
     type = "";
-    sign = "";
+    purpose = "";
 
     constructor(x, y) {
         this.x = x;
@@ -23,15 +28,28 @@ class Cell {
     }
 }
 
+class Template {
+    dimensionX;
+    dimensionY;
+    name;
+
+    constructor(dimensionX, dimensionY, name) {
+        this.dimensionX = dimensionX;
+        this.dimensionY = dimensionY;
+        this.name = name;
+    }
+}
+
 var layerForSites;
 var stage;
 var currentScale = DEFAULT_SCALE;
-var mDimensionX;
-var mDimensionY;
+var template;
 const selectedCells = new Map();
-
+const selectedRects = new Map();
+const savedCells = new Map();
 
 window.onload = () => {
+    localStorage.clear();
     Konva.dragButtons = [2];
     stage = new Konva.Stage({
         container: "container",
@@ -77,7 +95,6 @@ function setupLayerEvents() {
 
         if(e.evt.shiftKey && e.evt.buttons === 1) {
             changeCellStatus(e.target)
-            console.log(selectedCells.size);
         }
     });
 
@@ -88,6 +105,9 @@ function setupLayerEvents() {
     });
 
     layerForSites.on("click", (e) => {
+
+        showCellData(e.target);
+
         if(e.evt.shiftKey) {
             changeCellStatus(e.target);
         }
@@ -97,16 +117,24 @@ function setupLayerEvents() {
 function changeCellStatus(target) {
     let x = target.getX() / CELL_SIZE;
     let y = target.getY() / CELL_SIZE;
-    let key = x.toString() + y.toString()
+    let key = getKey(x, y);
     if(!selectedCells.has(key)) {
         selectedCells.set(key, new Cell(x, y));
-        target.fill(palette.selected);
-        target.draw();
     } else {
         selectedCells.delete(key);
-        target.fill(palette.default);
-        target.draw();
     }
+    if(!selectedRects.has(key)) {
+        target.fill(palette.selected);
+        selectedRects.set(key, target);
+    } else {
+        if(savedCells.has(key)) {
+            target.fill(palette[savedCells.get(key).purpose]);
+        } else {
+            target.fill(palette.default);
+        }
+        selectedRects.delete(key);
+    }
+    target.draw();
 }
 
 function setupStageEvents() {
@@ -161,7 +189,7 @@ function setupStageEvents() {
     });
 }
 
-function createSite(x, y, number) {
+function createRect(x, y, number) {
     var rect = new Konva.Rect({
         x: x * CELL_SIZE,
         y: y * CELL_SIZE,
@@ -177,39 +205,75 @@ function createSite(x, y, number) {
     layerForSites.add(rect);
 }
 
-function createMatrix() {
+function initTemplate() {
     stage.clear();
     selectedCells.clear();
+    localStorage.clear();
+
     let x = $("#x").val();
     let y = $("#y").val();
-    mDimensionX = x;
-    mDimensionY = y;
-    layerForSites.destroyChildren();
-    for(let i = 0; i < x; i++) {
-        for(let j = 0; j < y; j++) {
-            createSite(i, j, i*j);
+    let name = $("#tname").val();
+
+    if(!x || !y || !name) {
+        alert("Enter all data");
+    } else {
+        layerForSites.destroyChildren();
+
+        for(let i = 0; i < x; i++) {
+            for(let j = 0; j < y; j++) {
+                createRect(i, j, i*j);
+            }
         }
+
+        template = new Template(x, y, name);
+        localStorage.setItem("template", JSON.stringify(template));
+
+        currentScale = CANVAS_SIZE / x / CELL_SIZE;
+        stage.scale({ x: currentScale, y: currentScale });
+        stage.draw();
     }
-    currentScale = CANVAS_SIZE / x / CELL_SIZE;
-    stage.scale({ x: currentScale, y: currentScale });
-    stage.draw();
 }
 
 function applyChangesToCells() {
+    let type = $("#type").val();
+    let purpose = $("#purpose").val();
 
+    if(!template) {
+        alert("Create template first");
+    } else if(!type || !purpose) {
+        alert("Enter all data");
+    } else {
+        selectedCells.forEach((cell) => {
+            cell.type = type;
+            cell.purpose = purpose;
+            const key = getKey(cell.x, cell.y);
+            savedCells.set(key, cell);
+            const rect = selectedRects.get(key);
+            rect.fill(palette[cell.purpose]);
+            rect.draw();
+        });
+        selectedRects.clear();
+        selectedCells.clear();
+
+        saveCellsToStorage();
+    }
+}
+
+function saveCellsToStorage() {
+    const cells = [];
+    savedCells.forEach((cell) => cells.push(cell));
+    localStorage.setItem("cells", JSON.stringify(cells));
 }
 
 function stageSetDefault() {
     stage.position({x: 0, y: 0});
     stage.scale({
-        x: CANVAS_SIZE / CELL_SIZE / mDimensionX,
-        y: CANVAS_SIZE / CELL_SIZE / mDimensionY
+        x: CANVAS_SIZE / CELL_SIZE / template.dimensionX,
+        y: CANVAS_SIZE / CELL_SIZE / template.dimensionY
     });
     stage.clear();
     stage.draw();
 }
-
-
 
 function scaleToBlocks(scale) {
     return Math.round(CANVAS_SIZE / (CELL_SIZE * scale));
@@ -223,4 +287,27 @@ function moveToPoint(stage, x, y) {
         y: (-y + offsetToCenterY) * stage.scaleY() * CELL_SIZE,
         duration: 0.2,
     });
+}
+
+function getKey(x, y){
+    return x.toString() + y.toString();
+}
+
+function showCellData(target) {
+    let x = target.getX() / CELL_SIZE;
+    let y = target.getY() / CELL_SIZE;
+    let key = getKey(x, y);
+
+    
+    
+    if(savedCells.has(key)) {
+        const cell = savedCells.get(key);
+        $("#cell_address").html(`Address: ${x} : ${y}`);
+        $("#cell_purpose").html(`Purpose: ${cell.purpose}`);
+        $("#cell_type").html(`Type: ${cell.type}`);
+    } else {
+        $("#cell_address").html(`Address: `);
+        $("#cell_purpose").html(`Purpose: `);
+        $("#cell_type").html(`Type: `);
+    }
 }

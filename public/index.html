@@ -13,36 +13,59 @@
             <div id="container"></div>
             <div id="object-data"></div>
             <div class="manual">
-                <input id="x" type="number" placeholder="dimension X">
-                <input id="y" type="number" placeholder="dimension Y">
-                <button onclick="createMatrix()">Create template</button>
-                <button onclick="stageSetDefault()">Reset</button>
-                <!-- <ul>
-                    <li>Перемещение по карте -> Mouse Down (ЛКМ)</li>
-                    <li>
-                        Изменение масштаба карты -> Mouse Wheel (Колесо мыши)
-                    </li>
-                    <li>
-                        Красным контуром обведены участки, владелец которых
-                        мёртв
-                    </li>
-                    <li>Зеленый цвет - занятые участки</li>
-                    <li>Сервый цвет - свободные участки</li>
-                    <li>
-                        При наведении на участок, справа от карты отображается
-                        информация о нём
-                    </li>
-                    <li>
-                        В левом углу карты указано текущее местоположение
-                        курсора (по сути координаты блока)
-                    </li>
-                </ul> -->
+                <div class="form">
+                    <h3>Template characteristics</h3>
+                    <div>
+                        <input id="tname" placeholder="Template name" type="text">
+                        <br>
+                        <input id="x" type="number" placeholder="dimension X">
+                        <br>
+                        <input id="y" type="number" placeholder="dimension Y">
+                        <br>
+                        <button onclick="initTemplate()">Create template</button>
+                        <button onclick="stageSetDefault()">Reset</button>
+                    </div>
+                </div>
+                <div class="form">
+                    <h3>New cell characteristics</h3>
+                    <dev class="form-input">
+                        <label for="type">Type:</label>
+                        <select id="type" name="type">
+                            <option value="ADMIN">ADMIN</option>
+                            <option value="WALL">WALL</option>
+                        </select>
+                    </dev>
+                    <br>
+                    <dev class="form-input">
+                        <label for="purpose">Purpose:</label>
+                        <select id="purpose" name="purpose">
+                            <option value="wall">Wall</option>
+                            <option value="smithy">Smithy</option>
+                            <option value="guildhall">Guildhall</option>
+                            <option value="warehouse">Warehouse</option>
+                            <option value="arena">Arena</option>
+                        </select>                    
+                    </dev>
+                    <br>
+                    <button onclick="applyChangesToCells()">Apply</button>
+                    <br>
+                    <br>
+                    <button onclick="saveTemplate()">Save tamplate</button>
+                </div>
+                <div class="form">
+                    <h3>Current cell characteristics</h3>
+                    
+                    <p id="cell_address">Address: </p>
+                    <p id="cell_purpose">Purpose: </p>
+                    <p id="cell_type">Type: </p>
+                </div>
             </div>
         </div>
         <script>
             document.getElementById("container").addEventListener("contextmenu", e => e.preventDefault())
         </script>
         <script src="https://unpkg.com/konva@8/konva.min.js"></script>
-        <script type="text/javascript" src="./script.js"></script>
+        <script type="text/javascript" src="./matrix.js"></script>
+        <script type="text/javascript" src="./request.js"></script>
     </body>
 </html>
