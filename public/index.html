@@ -13,17 +13,29 @@
             <div id="container"></div>
             <div id="object-data"></div>
             <div class="manual">
-                <div class="form">
-                    <h3>Template characteristics</h3>
-                    <div>
-                        <input id="tname" placeholder="Template name" type="text">
-                        <br>
-                        <input id="x" type="number" placeholder="dimension X">
-                        <br>
-                        <input id="y" type="number" placeholder="dimension Y">
-                        <br>
-                        <button onclick="initTemplate()">Create template</button>
-                        <button onclick="stageSetDefault()">Reset</button>
+                <div>
+                    <div class="form">
+                        <h3>New template characteristics</h3>
+                        <div>
+                            <input id="tname" placeholder="Template name" type="text">
+                            <br>
+                            <input id="x" type="number" placeholder="dimension X">
+                            <br>
+                            <input id="y" type="number" placeholder="dimension Y">
+                            <br>
+                            <button onclick="initTemplate()">Create template</button>
+                            <button onclick="stageSetDefault()">Reset</button>
+                        </div>
+                    </div>
+                    <div class="form">
+                        <h3>Load existing template</h3>
+                        <div>
+                            <label for="existing_templates">Choose template</label>
+                            <select id="existing_templates">
+                                
+                            </select>
+                            <button onclick="loadTemplate()">Load template</button>
+                        </div>
                     </div>
                 </div>
                 <div class="form">
@@ -31,8 +43,8 @@
                     <dev class="form-input">
                         <label for="type">Type:</label>
                         <select id="type" name="type">
-                            <option value="ADMIN">ADMIN</option>
                             <option value="WALL">WALL</option>
+                            <option value="ADMIN">ADMIN</option>
                         </select>
                     </dev>
                     <br>
@@ -48,6 +60,7 @@
                     </dev>
                     <br>
                     <button onclick="applyChangesToCells()">Apply</button>
+                    <button onclick="clearCells()">Clear cells</button>
                     <br>
                     <br>
                     <button onclick="saveTemplate()">Save tamplate</button>
@@ -61,11 +74,12 @@
                 </div>
             </div>
         </div>
-        <script>
-            document.getElementById("container").addEventListener("contextmenu", e => e.preventDefault())
-        </script>
+        
         <script src="https://unpkg.com/konva@8/konva.min.js"></script>
         <script type="text/javascript" src="./matrix.js"></script>
         <script type="text/javascript" src="./request.js"></script>
+        <script>
+            document.getElementById("container").addEventListener("contextmenu", e => e.preventDefault())
+        </script>
     </body>
 </html>

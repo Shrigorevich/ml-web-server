@@ -43,10 +43,11 @@ class Template {
 var layerForSites;
 var stage;
 var currentScale = DEFAULT_SCALE;
-var template;
+var activeTemplate;
 const selectedCells = new Map();
 const selectedRects = new Map();
 const savedCells = new Map();
+const allRects = new Map();
 
 window.onload = () => {
     localStorage.clear();
@@ -85,6 +86,8 @@ window.onload = () => {
     stage.add(layerForSites);
     setupStageEvents();
     setupLayerEvents();
+
+    fetchTemplates();
 }
 
 function setupLayerEvents() {
@@ -189,7 +192,7 @@ function setupStageEvents() {
     });
 }
 
-function createRect(x, y, number) {
+function createDefaultRect(x, y) {
     var rect = new Konva.Rect({
         x: x * CELL_SIZE,
         y: y * CELL_SIZE,
@@ -203,12 +206,30 @@ function createRect(x, y, number) {
     });
 
     layerForSites.add(rect);
+    return rect; 
+}
+
+function createCustomRect(x, y, purpose) {
+    var rect = new Konva.Rect({
+        x: x * CELL_SIZE,
+        y: y * CELL_SIZE,
+        width: CELL_SIZE,
+        height: CELL_SIZE,
+        fill: palette[purpose],
+        opacity: 0.5,
+        stroke: "#000",
+        strokeWidth: 0.7,
+        perfectDrawEnabled: false,
+    });
+
+    layerForSites.add(rect);
+    return rect;
 }
 
 function initTemplate() {
     stage.clear();
     selectedCells.clear();
-    localStorage.clear();
+    savedCells.clear();
 
     let x = $("#x").val();
     let y = $("#y").val();
@@ -221,16 +242,45 @@ function initTemplate() {
 
         for(let i = 0; i < x; i++) {
             for(let j = 0; j < y; j++) {
-                createRect(i, j, i*j);
+                const rect = createDefaultRect(i, j);
+                allRects.set(getKey(i, j), rect); 
             }
         }
 
-        template = new Template(x, y, name);
-        localStorage.setItem("template", JSON.stringify(template));
-
+        activeTemplate = new Template(x, y, name);
+        storeTemplateCredential(activeTemplate);
         currentScale = CANVAS_SIZE / x / CELL_SIZE;
         stage.scale({ x: currentScale, y: currentScale });
         stage.draw();
+        localStorage.setItem("activeTemplate", activeTemplate.name);
+    }
+}
+
+function storeTemplateCredential(template) {
+    let savedTemplate = JSON.parse(localStorage.getItem(template.name));
+    if(savedTemplate) {
+        savedTemplate.template = template;   
+    } else {
+        localStorage.setItem(template.name, JSON.stringify({template, cells: []}));
+    }
+}
+
+function clearCells() {
+    if(!activeTemplate) {
+        alert("Create template first");
+    } else {
+        selectedCells.forEach((cell) => {
+            const key = getKey(cell.x, cell.y);
+            savedCells.delete(key);
+            selectedRects.get(key).destroy();
+            const newRect = createDefaultRect(cell.x, cell.y);
+            allRects.set(key, newRect); 
+            newRect.draw();
+        });
+        selectedRects.clear();
+        selectedCells.clear();
+
+        storeCells();
     }
 }
 
@@ -238,7 +288,7 @@ function applyChangesToCells() {
     let type = $("#type").val();
     let purpose = $("#purpose").val();
 
-    if(!template) {
+    if(!activeTemplate) {
         alert("Create template first");
     } else if(!type || !purpose) {
         alert("Enter all data");
@@ -249,27 +299,32 @@ function applyChangesToCells() {
             const key = getKey(cell.x, cell.y);
             savedCells.set(key, cell);
             const rect = selectedRects.get(key);
-            rect.fill(palette[cell.purpose]);
-            rect.draw();
+            rect.destroy();
+            const newRect = createCustomRect(cell.x, cell.y, purpose);
+            allRects.set(key, newRect); 
+            newRect.draw();
         });
         selectedRects.clear();
         selectedCells.clear();
 
-        saveCellsToStorage();
+        storeCells();
     }
 }
 
-function saveCellsToStorage() {
+function storeCells() {
     const cells = [];
     savedCells.forEach((cell) => cells.push(cell));
-    localStorage.setItem("cells", JSON.stringify(cells));
+
+    let savedTemplate = JSON.parse(localStorage.getItem(activeTemplate.name));
+    savedTemplate.cells = cells;
+    localStorage.setItem(activeTemplate.name, JSON.stringify(savedTemplate));
 }
 
 function stageSetDefault() {
     stage.position({x: 0, y: 0});
     stage.scale({
-        x: CANVAS_SIZE / CELL_SIZE / template.dimensionX,
-        y: CANVAS_SIZE / CELL_SIZE / template.dimensionY
+        x: CANVAS_SIZE / CELL_SIZE / activeTemplate.dimensionX,
+        y: CANVAS_SIZE / CELL_SIZE / activeTemplate.dimensionY
     });
     stage.clear();
     stage.draw();
@@ -310,4 +365,75 @@ function showCellData(target) {
         $("#cell_purpose").html(`Purpose: `);
         $("#cell_type").html(`Type: `);
     }
+}
+
+function loadTemplate() {
+    layerForSites.destroyChildren();
+    selectedCells.clear();
+    savedCells.clear();
+    const selectedTemplate = $("#existing_templates").val();
+    
+    if(selectedTemplate) {
+        const {template, cells} = JSON.parse(localStorage.getItem(selectedTemplate)); 
+
+        currentScale = CANVAS_SIZE / template.dimensionX / CELL_SIZE;
+        stage.scale({ x: currentScale, y: currentScale });
+
+        for(let i = 0; i < template.dimensionX; i++) {
+            for(let j = 0; j < template.dimensionY; j++) {
+                const key = getKey(i, j);
+                const cell = cells.find((value) => value.x == i && value.y == j);
+                let rect;
+                if(cell) {
+                    rect = createCustomRect(cell.x, cell.y, cell.purpose);
+                    savedCells.set(key, cell);
+                } else {
+                    rect = createDefaultRect(i, j);  
+                }
+                allRects.set(key, rect);
+                rect.draw();
+            }
+        }
+
+        activeTemplate = new Template(template.dimensionX, template.dimensionY, template.name);
+        //layerForSites.draw();
+        localStorage.setItem("activeTemplate", activeTemplate.name)
+    }
+}
+
+async function fetchTemplates() {
+    try {
+        const response = await fetch("/api/templates", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await response.json();
+        if(data.templates && data.templates.length > 0) {
+
+            data.templates.forEach((template) => {
+
+                const cells = data.cells.filter((cell) => cell.templateName === template.name);
+                const templateToSave = {template, cells};
+                localStorage.setItem(template.name, JSON.stringify(templateToSave));
+            })
+        }
+        
+        let dropDownOptions = $("#existing_templates").html();
+        data.templates.forEach(template => {
+            dropDownOptions += `<option>${template.name}</option>`
+        });
+
+        $("#existing_templates").html(dropDownOptions);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+function clearCache() {
+    localStorage.removeItem("cells");
+    localStorage.removeItem("currentTemplate");
 }

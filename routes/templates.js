@@ -2,10 +2,12 @@ const { Router } = require("express");
 const router = Router();
 const TemplateCell = require("../models/TemplateCell");
 const Template = require("../models/Template");
+const templateService = require("../services/TemplateService");
 
 router.get("/", async (req, res) => {
-    const templates = await Template.find();
-    res.status(200).json({ templates });
+    const templates = await Template.find().select("-_id");
+    const cells = await TemplateCell.find().select("-_id");
+    res.status(200).json({ templates, cells });
 });
 
 router.get("/:name", async (req, res) => {
@@ -17,119 +19,41 @@ router.get("/:name", async (req, res) => {
 router.post("/", async (req, res) => {
     const { template, cells } = req.body;
 
-    console.log(template, cells);
-    // const template = new Template({
-    //     name: template.name,
-    //     dimensionX: template.dimensionX,
-    //     dimensionY: template.dimensionY,
-    // });
+    const existingTemplate = await Template.findOne({name: template.name});
 
-    // cells.array.forEach(element => {
-        
-    //     const cell = new TemplateCell({
-    //         x: element.x,
-    //         y: element.y,
-    //         templateName: element.templateNama,
-            
-    //     });
-    // });
-
-    //await region.save();
-    res.status(201);
+    if (existingTemplate) {
+        await TemplateCell.deleteMany({templateName: template.name});
+        templateService.getCellAsyncTaskList(cells, template.name)
+            .then((values) => {
+                res.status(201).json({message: "Success"});
+            })
+            .catch(async (error) => {
+                console.log("Cell: ", error);
+                res.status(500).json({message: error});
+            })
+    } else {
+        const newTemplate = new Template({
+            name: template.name,
+            dimensionX: template.dimensionX,
+            dimensionY: template.dimensionY,
+        });
+        newTemplate.save()
+        .then(() => {
+            templateService.getCellAsyncTaskList(cells, template.name)
+            .then((values) => {
+                res.status(201).json({message: "Success"});
+            })
+            .catch(async (error) => {
+                console.log("Cell: ", error);
+                await Template.deleteOne({name: template.name});
+                res.status(500).json({message: error});
+            })
+        })
+        .catch((error) => {
+            console.log("Template: ", error)
+            res.status(500).json({message: error});
+        })
+    }
 });
-
-
-
-// router.post("/create-region", async (req, res) => {
-
-//     try {
-//         const region = new CivilRegion({
-//             number: Number(number),
-//             owner,
-//             tl_coords: {
-//                 x: Number(tl_coords.split(" ")[0].trim()),
-//                 y: Number(tl_coords.split(" ")[1].trim()),
-//             },
-//             tr_coords: {
-//                 x: Number(tr_coords.split(" ")[0].trim()),
-//                 y: Number(tr_coords.split(" ")[1].trim()),
-//             },
-//             br_coords: {
-//                 x: Number(br_coords.split(" ")[0].trim()),
-//                 y: Number(br_coords.split(" ")[1].trim()),
-//             },
-//             bl_coords: {
-//                 x: Number(bl_coords.split(" ")[0].trim()),
-//                 y: Number(bl_coords.split(" ")[1].trim()),
-//             },
-//             for_sale,
-//             description,
-//         });
-
-//         const doc = await region.save();
-//         console.log(doc);
-//         res.status(200).json({ status: "Success" });
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ status: "Fail" });
-//     }
-// });
-
-// router.post("/change-region", async (req, res) => {
-//     const {
-//         number,
-//         owner,
-//         tl_coords,
-//         tr_coords,
-//         br_coords,
-//         bl_coords,
-//         description,
-//         for_sale,
-//     } = req.body.regionData;
-//     console.log(req.body.regionData);
-//     try {
-//         const doc = await CivilRegion.findOneAndUpdate(
-//             { number: Number(number) },
-//             {
-//                 owner,
-//                 tl_coords: {
-//                     x: Number(tl_coords.split(" ")[0].trim()),
-//                     y: Number(tl_coords.split(" ")[1].trim()),
-//                 },
-//                 tr_coords: {
-//                     x: Number(tr_coords.split(" ")[0].trim()),
-//                     y: Number(tr_coords.split(" ")[1].trim()),
-//                 },
-//                 br_coords: {
-//                     x: Number(br_coords.split(" ")[0].trim()),
-//                     y: Number(br_coords.split(" ")[1].trim()),
-//                 },
-//                 bl_coords: {
-//                     x: Number(bl_coords.split(" ")[0].trim()),
-//                     y: Number(bl_coords.split(" ")[1].trim()),
-//                 },
-//                 for_sale: for_sale,
-//             }
-//         );
-
-//         console.log(doc);
-//         res.status(200).json({ status: "Success" });
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ status: "Fail" });
-//     }
-// });
-
-// router.post("/delete-region", async (req, res) => {
-//     console.log("Delete region");
-//     try {
-//         const doc = await CivilRegion.findOneAndDelete({
-//             number: req.body.regionNumber,
-//         });
-//         res.status(200).json({ status: "Success" });
-//     } catch (error) {
-//         res.status(500).json({ status: "Fail" });
-//     }
-// });
 
 module.exports = router;

@@ -3,15 +3,12 @@ async function saveTemplate() {
     const isConfirmed = confirm("Are you sure?");
 
     if (isConfirmed) {
-        const cells = getCells();
+
         const template = getTemplate();
 
-        console.log(cells);
         console.log(template);
-        if(!template) {
+        if(!template && !template.cells) {
             alert("Create template first");
-        } else if (!cells) {
-            alert("Set cells first")
         } else {
             try {
                 const respons = await fetch("/api/templates", {
@@ -19,7 +16,10 @@ async function saveTemplate() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ cells, template })
+                    body: JSON.stringify({ 
+                        template: template.template,
+                        cells: template.cells
+                    })
                 });
             } catch (error) {
                 console.log(error);
@@ -28,10 +28,7 @@ async function saveTemplate() {
     }
 }
 
-function getCells() {
-    return JSON.parse(localStorage.getItem("cells"));
-}
-
 function getTemplate() {
-    return JSON.parse(localStorage.getItem("template"));
+    const templateName =  localStorage.getItem("activeTemplate");
+    return JSON.parse(localStorage.getItem(templateName));
 }
