@@ -1,11 +1,10 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const schema = new Schema({
-   owner: {type: String, required: true},
-   x: {type: Number, required: true},
-   y: {type: Number, required: true},
-   type: {type: String, required: true},
-   purpose: {type: String, required: true}
+const schema = new mongoose.Schema({
+   villageName: { type: String, required: true },
+   address: { type: mongoose.Mixed, required: true },
+   type: { type: String, required: true },
+   purpose: { type: String, required: true }
 })
 
-export default model('VillageCell', schema);
+export default mongoose.model('VillageCell', schema);

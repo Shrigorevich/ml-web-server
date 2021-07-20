@@ -1,7 +1,6 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import jwt from "jsonwebtoken";
-
-dotenv.config();
+config();
 
 function auth(req, res, next) {
 

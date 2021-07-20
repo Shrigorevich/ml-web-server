@@ -21,9 +21,8 @@ router.post("/", async (req, res) => {
     const existingIp = user.ips.find(item => item === ip);
 
     if (!existingIp) {
-      await updateOne({ _id: user._id }, { ips: [...user.ips, ip] })
+      await User.updateOne({ _id: user._id }, { ips: [...user.ips, ip] })
     }
-
     jwt.sign(
       {
         id: user.id,
@@ -40,13 +39,6 @@ router.post("/", async (req, res) => {
       }
     );
   });
-});
-
-router.get("/profile", auth, (req, res) => {
-  console.log("profile");
-  findById(req.user.id)
-    .select("-password")
-    .then((user) => res.json(user));
 });
 
 export default router;

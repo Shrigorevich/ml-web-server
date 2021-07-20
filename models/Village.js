@@ -1,9 +1,9 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const schema = new Schema({
-   name: {type: String, required: true},
-   dimensionX: {type: Number, required: true},
-   dimensionZ: {type: Number, required: true},
+const schema = new mongoose.Schema({
+   name: { type: String, required: true },
+   dimensionX: { type: Number, required: true },
+   dimensionZ: { type: Number, required: true },
 })
 
-export default model('Village', schema);
+export default mongoose.model('Village', schema);
