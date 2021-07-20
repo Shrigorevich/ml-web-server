@@ -1,10 +1,10 @@
-const { Router } = require("express");
+import { Router } from "express";
 const router = Router();
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const dotenv = require('dotenv');
-const jwt = require("jsonwebtoken");
-const auth = require('../middlewares/auth');
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import dotenv from 'dotenv';
+import jwt from "jsonwebtoken";
+import auth from '../middlewares/auth.js';
 
 dotenv.config();
 
@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
    const user = new User({ nickname, email, password, ips: [ip] });
    //Create salt & hash
    bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(user.password, salt, (err, hash) => {
+      bcrypt._hash(user.password, salt, (err, hash) => {
          if (err) throw err;
          user.password = hash;
          user.save().then((user) => {
@@ -63,5 +63,5 @@ router.post("/", async (req, res) => {
    });
 });
 
-module.exports = router;
+export default router;
 

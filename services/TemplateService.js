@@ -1,4 +1,4 @@
-const TemplateCell = require("../models/TemplateCell");
+import TemplateCell from "../models/TemplateCell.js";
 
 function getCellAsyncTaskList(cells, templateName) {
 
@@ -18,4 +18,4 @@ function getCellAsyncTaskList(cells, templateName) {
     return Promise.all(promises);
 }
 
-module.exports = {getCellAsyncTaskList}
+export { getCellAsyncTaskList }

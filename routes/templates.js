@@ -1,8 +1,8 @@
-const { Router } = require("express");
+import { Router } from "express";
 const router = Router();
-const TemplateCell = require("../models/TemplateCell");
-const Template = require("../models/Template");
-const templateService = require("../services/TemplateService");
+import TemplateCell from "../models/TemplateCell.js";
+import Template from "../models/Template.js";
+import { getCellAsyncTaskList } from "../services/TemplateService.js";
 
 router.get("/", async (req, res) => {
     const templates = await Template.find().select("-_id");
@@ -12,24 +12,24 @@ router.get("/", async (req, res) => {
 
 router.get("/:name", async (req, res) => {
     const name = req.params.name;
-    const template = await Template.findOne({name});
+    const template = await Template.findOne({ name });
     return template;
 })
 
 router.post("/", async (req, res) => {
     const { template, cells } = req.body;
 
-    const existingTemplate = await Template.findOne({name: template.name});
+    const existingTemplate = await Template.findOne({ name: template.name });
 
     if (existingTemplate) {
-        await TemplateCell.deleteMany({templateName: template.name});
-        templateService.getCellAsyncTaskList(cells, template.name)
+        await Template.deleteMany({ templateName: template.name });
+        getCellAsyncTaskList(cells, template.name)
             .then((values) => {
-                res.status(201).json({message: "Success"});
+                res.status(201).json({ message: "Success" });
             })
             .catch(async (error) => {
                 console.log("Cell: ", error);
-                res.status(500).json({message: error});
+                res.status(500).json({ message: error });
             })
     } else {
         const newTemplate = new Template({
@@ -38,22 +38,22 @@ router.post("/", async (req, res) => {
             dimensionY: template.dimensionY,
         });
         newTemplate.save()
-        .then(() => {
-            templateService.getCellAsyncTaskList(cells, template.name)
-            .then((values) => {
-                res.status(201).json({message: "Success"});
+            .then(() => {
+                getCellAsyncTaskList(cells, template.name)
+                    .then((values) => {
+                        res.status(201).json({ message: "Success" });
+                    })
+                    .catch(async (error) => {
+                        console.log("Cell: ", error);
+                        await deleteOne({ name: template.name });
+                        res.status(500).json({ message: error });
+                    })
             })
-            .catch(async (error) => {
-                console.log("Cell: ", error);
-                await Template.deleteOne({name: template.name});
-                res.status(500).json({message: error});
+            .catch((error) => {
+                console.log("Template: ", error)
+                res.status(500).json({ message: error });
             })
-        })
-        .catch((error) => {
-            console.log("Template: ", error)
-            res.status(500).json({message: error});
-        })
     }
 });
 
-module.exports = router;
+export default router;

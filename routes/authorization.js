@@ -1,16 +1,16 @@
-const { Router } = require("express");
+import { Router } from "express";
 const router = Router();
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const auth = require("../middlewares/auth");
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import auth from "../middlewares/auth.js";
 
 router.post("/", async (req, res) => {
   const { nickname, password, ip } = req.body;
 
   //Check for existing user
   const user = await User.findOne({ nickname: nickname });
-  
+
   if (!user) { return res.status(400).json({ msg: "User does not exists" }); }
   else if (!ip) { return res.status(400).json({ msg: "Invalid Ip" }); }
 
@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
     const existingIp = user.ips.find(item => item === ip);
 
     if (!existingIp) {
-      await User.updateOne({ _id: user._id }, { ips: [...user.ips, ip] })
+      await updateOne({ _id: user._id }, { ips: [...user.ips, ip] })
     }
 
     jwt.sign(
@@ -44,9 +44,9 @@ router.post("/", async (req, res) => {
 
 router.get("/profile", auth, (req, res) => {
   console.log("profile");
-  User.findById(req.user.id)
+  findById(req.user.id)
     .select("-password")
     .then((user) => res.json(user));
 });
 
-module.exports = router;
+export default router;
