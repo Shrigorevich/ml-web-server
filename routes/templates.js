@@ -2,7 +2,7 @@ import { Router } from "express";
 const router = Router();
 import TemplateCell from "../models/TemplateCell.js";
 import Template from "../models/Template.js";
-import { getCellAsyncTaskList } from "../services/TemplateService.js";
+import { saveTemplateCellsAsync } from "../services/templateService.js";
 
 router.get("/", async (req, res) => {
     const templates = await Template.find().select("-_id");
@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
 
     if (existingTemplate) {
         await Template.deleteMany({ templateName: template.name });
-        getCellAsyncTaskList(cells, template.name)
+        saveTemplateCellsAsync(cells, template.name)
             .then((values) => {
                 res.status(201).json({ message: "Success" });
             })

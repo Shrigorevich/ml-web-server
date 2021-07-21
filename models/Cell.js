@@ -7,4 +7,4 @@ const schema = new mongoose.Schema({
    purpose: { type: String, required: true }
 })
 
-export default mongoose.model('VillageCell', schema);
+export default mongoose.model('MatrixCell', schema);

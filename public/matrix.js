@@ -1,4 +1,4 @@
-const CANVAS_SIZE = 700; // pixels
+const CANVAS_SIZE = 900; // pixels
 const CELL_SIZE = 10; // pixels
 
 const DEFAULT_SCALE = 2;
@@ -96,7 +96,7 @@ function setupLayerEvents() {
         box.opacity(1);
         box.draw();
 
-        if(e.evt.shiftKey && e.evt.buttons === 1) {
+        if (e.evt.shiftKey && e.evt.buttons === 1) {
             changeCellStatus(e.target)
         }
     });
@@ -111,7 +111,7 @@ function setupLayerEvents() {
 
         showCellData(e.target);
 
-        if(e.evt.shiftKey) {
+        if (e.evt.shiftKey) {
             changeCellStatus(e.target);
         }
     })
@@ -121,16 +121,16 @@ function changeCellStatus(target) {
     let x = target.getX() / CELL_SIZE;
     let y = target.getY() / CELL_SIZE;
     let key = getKey(x, y);
-    if(!selectedCells.has(key)) {
+    if (!selectedCells.has(key)) {
         selectedCells.set(key, new Cell(x, y));
     } else {
         selectedCells.delete(key);
     }
-    if(!selectedRects.has(key)) {
+    if (!selectedRects.has(key)) {
         target.fill(palette.selected);
         selectedRects.set(key, target);
     } else {
-        if(savedCells.has(key)) {
+        if (savedCells.has(key)) {
             target.fill(palette[savedCells.get(key).purpose]);
         } else {
             target.fill(palette.default);
@@ -206,7 +206,7 @@ function createDefaultRect(x, y) {
     });
 
     layerForSites.add(rect);
-    return rect; 
+    return rect;
 }
 
 function createCustomRect(x, y, purpose) {
@@ -235,15 +235,15 @@ function initTemplate() {
     let y = $("#y").val();
     let name = $("#tname").val();
 
-    if(!x || !y || !name) {
+    if (!x || !y || !name) {
         alert("Enter all data");
     } else {
         layerForSites.destroyChildren();
 
-        for(let i = 0; i < x; i++) {
-            for(let j = 0; j < y; j++) {
+        for (let i = 0; i < x; i++) {
+            for (let j = 0; j < y; j++) {
                 const rect = createDefaultRect(i, j);
-                allRects.set(getKey(i, j), rect); 
+                allRects.set(getKey(i, j), rect);
             }
         }
 
@@ -258,15 +258,15 @@ function initTemplate() {
 
 function storeTemplateCredential(template) {
     let savedTemplate = JSON.parse(localStorage.getItem(template.name));
-    if(savedTemplate) {
-        savedTemplate.template = template;   
+    if (savedTemplate) {
+        savedTemplate.template = template;
     } else {
-        localStorage.setItem(template.name, JSON.stringify({template, cells: []}));
+        localStorage.setItem(template.name, JSON.stringify({ template, cells: [] }));
     }
 }
 
 function clearCells() {
-    if(!activeTemplate) {
+    if (!activeTemplate) {
         alert("Create template first");
     } else {
         selectedCells.forEach((cell) => {
@@ -274,7 +274,7 @@ function clearCells() {
             savedCells.delete(key);
             selectedRects.get(key).destroy();
             const newRect = createDefaultRect(cell.x, cell.y);
-            allRects.set(key, newRect); 
+            allRects.set(key, newRect);
             newRect.draw();
         });
         selectedRects.clear();
@@ -288,9 +288,9 @@ function applyChangesToCells() {
     let type = $("#type").val();
     let purpose = $("#purpose").val();
 
-    if(!activeTemplate) {
+    if (!activeTemplate) {
         alert("Create template first");
-    } else if(!type || !purpose) {
+    } else if (!type || !purpose) {
         alert("Enter all data");
     } else {
         selectedCells.forEach((cell) => {
@@ -301,7 +301,7 @@ function applyChangesToCells() {
             const rect = selectedRects.get(key);
             rect.destroy();
             const newRect = createCustomRect(cell.x, cell.y, purpose);
-            allRects.set(key, newRect); 
+            allRects.set(key, newRect);
             newRect.draw();
         });
         selectedRects.clear();
@@ -321,7 +321,7 @@ function storeCells() {
 }
 
 function stageSetDefault() {
-    stage.position({x: 0, y: 0});
+    stage.position({ x: 0, y: 0 });
     stage.scale({
         x: CANVAS_SIZE / CELL_SIZE / activeTemplate.dimensionX,
         y: CANVAS_SIZE / CELL_SIZE / activeTemplate.dimensionY
@@ -344,7 +344,7 @@ function moveToPoint(stage, x, y) {
     });
 }
 
-function getKey(x, y){
+function getKey(x, y) {
     return x.toString() + y.toString();
 }
 
@@ -353,9 +353,9 @@ function showCellData(target) {
     let y = target.getY() / CELL_SIZE;
     let key = getKey(x, y);
 
-    
-    
-    if(savedCells.has(key)) {
+
+
+    if (savedCells.has(key)) {
         const cell = savedCells.get(key);
         $("#cell_address").html(`Address: ${x} : ${y}`);
         $("#cell_purpose").html(`Purpose: ${cell.purpose}`);
@@ -372,23 +372,23 @@ function loadTemplate() {
     selectedCells.clear();
     savedCells.clear();
     const selectedTemplate = $("#existing_templates").val();
-    
-    if(selectedTemplate) {
-        const {template, cells} = JSON.parse(localStorage.getItem(selectedTemplate)); 
+
+    if (selectedTemplate) {
+        const { template, cells } = JSON.parse(localStorage.getItem(selectedTemplate));
 
         currentScale = CANVAS_SIZE / template.dimensionX / CELL_SIZE;
         stage.scale({ x: currentScale, y: currentScale });
 
-        for(let i = 0; i < template.dimensionX; i++) {
-            for(let j = 0; j < template.dimensionY; j++) {
+        for (let i = 0; i < template.dimensionX; i++) {
+            for (let j = 0; j < template.dimensionY; j++) {
                 const key = getKey(i, j);
                 const cell = cells.find((value) => value.x == i && value.y == j);
                 let rect;
-                if(cell) {
+                if (cell) {
                     rect = createCustomRect(cell.x, cell.y, cell.purpose);
                     savedCells.set(key, cell);
                 } else {
-                    rect = createDefaultRect(i, j);  
+                    rect = createDefaultRect(i, j);
                 }
                 allRects.set(key, rect);
                 rect.draw();
@@ -411,22 +411,23 @@ async function fetchTemplates() {
         });
 
         const data = await response.json();
-        if(data.templates && data.templates.length > 0) {
+        if (data.templates && data.templates.length > 0) {
 
             data.templates.forEach((template) => {
 
                 const cells = data.cells.filter((cell) => cell.templateName === template.name);
-                const templateToSave = {template, cells};
+                const templateToSave = { template, cells };
                 localStorage.setItem(template.name, JSON.stringify(templateToSave));
             })
         }
-        
+
         let dropDownOptions = $("#existing_templates").html();
         data.templates.forEach(template => {
             dropDownOptions += `<option>${template.name}</option>`
         });
 
         $("#existing_templates").html(dropDownOptions);
+        $("template_dropdown").html(dropDownOptions);
 
     } catch (error) {
         console.log(error);

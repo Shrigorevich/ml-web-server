@@ -1,6 +1,6 @@
 import TemplateCell from "../models/TemplateCell.js";
 
-function getCellAsyncTaskList(cells, templateName) {
+function saveTemplateCellsAsync(cells, templateName) {
 
     const promises = [];
 
@@ -18,4 +18,4 @@ function getCellAsyncTaskList(cells, templateName) {
     return Promise.all(promises);
 }
 
-export { getCellAsyncTaskList }
+export { saveTemplateCellsAsync }
