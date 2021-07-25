@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Village from "../models/Village.js";
-import { applyTemplateToVillageAsync, isDimensionsCompatible } from "../services/villageService.js";
+import { applyTemplateToVillageAsync, isDimensionsCompatible, ApplyingException } from "../services/villageService.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
@@ -10,20 +10,30 @@ router.get("/", async (req, res) => {
 
 router.put("/", async (req, res) => {
 
-    const { template, villageName } = req.body;
-    const village = await Village.findOne({ name: villageName });
+    try {
+        const { template, villageName } = req.body;
+        const village = await Village.findOne({ name: villageName });
 
-    if (village.status === "LOCATED") {
-        const isCompatible = isDimensionsCompatible(
-            template.dimensionX, template.dimensionY,
-            village.dimensionX, village.dimensionZ
-        );
+        if (village.status === "LOCATED") {
+            const isCompatible = isDimensionsCompatible(
+                template.instance.dimensionX, template.instance.dimensionY,
+                village.dimensionX, village.dimensionZ
+            );
 
-        applyTemplateToVillageAsync(template.cells)
-            .then(() => {
-                Village.updateOne({ name: villageName }, { status: "ACTIVE" });
-            });
-        console.log(cells);
+            if (isCompatible) {
+                applyTemplateToVillageAsync(template.cells, villageName)
+                    .then(async () => {
+                        await Village.updateOne({ name: villageName }, { status: "ACTIVE" });
+                    })
+                    .catch((error) => {
+                        throw new ApplyingException(error)
+                    });
+            }
+        }
+        res.sendStatus(204);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
 })
 
@@ -33,6 +43,13 @@ router.post("/", async (req, res) => {
     const village = new Village({
         name: villageName,
     });
+
+    await village.save()
+        .then(() => res.status(201).json({ message: "Successfully created" }))
+        .catch((error) => {
+            console.log(error);
+            res.status(500).json({ message: "Something went wrong" })
+        })
 })
 
 export default router;

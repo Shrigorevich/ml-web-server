@@ -51,11 +51,11 @@
                 <dev class="form-input">
                     <label for="purpose">Purpose:</label>
                     <select id="purpose" name="purpose">
-                        <option value="wall">Wall</option>
-                        <option value="smithy">Smithy</option>
-                        <option value="guildhall">Guildhall</option>
-                        <option value="warehouse">Warehouse</option>
-                        <option value="arena">Arena</option>
+                        <option value="Wall">Wall</option>
+                        <option value="Smithy">Smithy</option>
+                        <option value="Guildhall">Guildhall</option>
+                        <option value="Warehouse">Warehouse</option>
+                        <option value="Arena">Arena</option>
                     </select>
                 </dev>
                 <br>
@@ -84,16 +84,26 @@
 
             <div class="form">
                 <h3>Apply template to village</h3>
-                <select id="village-dropdown"></select>
-                <select id="template-dropdown"></select>
+
+                <label for="village_dropdown">Village</label>
+                <br>
+                <select id="village_dropdown"></select>
+                <br>
+                <label for="template_dropdown">Template</label>
+                <br>
+                <select id="template_dropdown"></select>
+                <br>
                 <button onclick="applyTemplate()">Apply</button>
             </div>
+            <!-- <button onclick="mainProcessor()">TEST</button> -->
         </div>
     </div>
 
     <script src="https://unpkg.com/konva@8/konva.min.js"></script>
-    <script type="text/javascript" src="./matrix.js"></script>
-    <script type="text/javascript" src="./request.js"></script>
+    <!-- <script type="text/javascript" src="./matrix.js"></script>
+    <script type="text/javascript" src="./request.js"></script> -->
+    <!-- <script type="module" src="./modules/index.js"></script> -->
+    <script type="module" src="./modules/index.js"></script>
     <script>
         document.getElementById("container").addEventListener("contextmenu", e => e.preventDefault())
     </script>

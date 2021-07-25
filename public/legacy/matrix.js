@@ -82,12 +82,13 @@ window.onload = () => {
     });
 
     layerForSites = new Konva.Layer();
-    layerForSites.setZIndex(2);
+    //layerForSites.setZIndex(2);
     stage.add(layerForSites);
     setupStageEvents();
     setupLayerEvents();
 
     fetchTemplates();
+    fetchVillages();
 }
 
 function setupLayerEvents() {
@@ -158,9 +159,7 @@ function setupStageEvents() {
 
         if (newScale > MAX_SCALE || newScale < MIN_SCALE) return;
 
-        currentScale = newScale;
-
-        stage.scale({ x: currentScale, y: currentScale });
+        stage.scale({ x: newScale, y: newScale });
 
         var newPos = {
             x: pointer.x - mousePointTo.x * newScale,
@@ -180,11 +179,11 @@ function setupStageEvents() {
     stage.on("mousemove", (e) => {
         var coord = stage.getPointerPosition();
 
-        const offsetX = -stage.x() / (CELL_SIZE * currentScale);
-        const offsetY = -stage.y() / (CELL_SIZE * currentScale);
+        const offsetX = -stage.x() / (CELL_SIZE * stage.scaleX());
+        const offsetY = -stage.y() / (CELL_SIZE * stage.scaleY());
 
-        var x = Math.floor(coord.x / (CELL_SIZE * currentScale) + offsetX);
-        var y = Math.floor(coord.y / (CELL_SIZE * currentScale) + offsetY);
+        var x = Math.floor(coord.x / (CELL_SIZE * stage.scaleX()) + offsetX);
+        var y = Math.floor(coord.y / (CELL_SIZE * stage.scaleY()) + offsetY);
 
         document.getElementById(
             "pointer-position"
@@ -374,13 +373,13 @@ function loadTemplate() {
     const selectedTemplate = $("#existing_templates").val();
 
     if (selectedTemplate) {
-        const { template, cells } = JSON.parse(localStorage.getItem(selectedTemplate));
+        const { instance, cells } = JSON.parse(localStorage.getItem(selectedTemplate));
 
-        currentScale = CANVAS_SIZE / template.dimensionX / CELL_SIZE;
+        currentScale = CANVAS_SIZE / instance.dimensionX / CELL_SIZE;
         stage.scale({ x: currentScale, y: currentScale });
 
-        for (let i = 0; i < template.dimensionX; i++) {
-            for (let j = 0; j < template.dimensionY; j++) {
+        for (let i = 0; i < instance.dimensionX; i++) {
+            for (let j = 0; j < instance.dimensionY; j++) {
                 const key = getKey(i, j);
                 const cell = cells.find((value) => value.x == i && value.y == j);
                 let rect;
@@ -391,12 +390,11 @@ function loadTemplate() {
                     rect = createDefaultRect(i, j);
                 }
                 allRects.set(key, rect);
-                rect.draw();
             }
         }
 
-        activeTemplate = new Template(template.dimensionX, template.dimensionY, template.name);
-        //layerForSites.draw();
+        activeTemplate = new Template(instance.dimensionX, instance.dimensionY, instance.name);
+        layerForSites.draw();
         localStorage.setItem("activeTemplate", activeTemplate.name)
     }
 }
@@ -416,7 +414,7 @@ async function fetchTemplates() {
             data.templates.forEach((template) => {
 
                 const cells = data.cells.filter((cell) => cell.templateName === template.name);
-                const templateToSave = { template, cells };
+                const templateToSave = { instance: template, cells };
                 localStorage.setItem(template.name, JSON.stringify(templateToSave));
             })
         }
@@ -427,11 +425,30 @@ async function fetchTemplates() {
         });
 
         $("#existing_templates").html(dropDownOptions);
-        $("template_dropdown").html(dropDownOptions);
+        $("#template_dropdown").html(dropDownOptions);
 
     } catch (error) {
         console.log(error);
     }
+}
+
+async function fetchVillages() {
+
+    const response = await fetch("/api/villages", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    const data = await response.json();
+
+    let dropDownOptions = $("#village_dropdown").html();
+    data.villages.forEach(village => {
+        dropDownOptions += `<option>${village.name}</option>`
+    });
+
+    $("#village_dropdown").html(dropDownOptions);
 }
 
 function clearCache() {

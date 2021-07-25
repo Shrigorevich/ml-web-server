@@ -1,21 +1,19 @@
-import TemplateCell from "../models/TemplateCell.js";
 import Cell from "../models/Cell.js";
 
-function applyTemplateToVillageAsync(villageCells, templateCells, villageName) {
+async function applyTemplateToVillageAsync(templateCells, villageName) {
 
     const promises = [];
-
     templateCells.forEach((cell) => {
         promises.push(Cell.updateOne(
-            { villageName },
+            {
+                villageName,
+                "address.i": cell.i,
+                "address.j": cell.j
+            },
             {
                 type: cell.type,
                 purpose: cell.purpose
-            },
-            [
-                { "address.i": { $eq: cell.x } },
-                { "address.j": { $eq: cell.y } }
-            ]
+            }
         ));
     });
 
@@ -26,4 +24,8 @@ function isDimensionsCompatible(dimX1, dimZ1, dimX2, dimZ2) {
     return dimX1 === dimX2 && dimZ1 === dimZ2;
 }
 
-export { applyTemplateToVillageAsync, isDimensionsCompatible }
+function ApplyingException(message) {
+    this.message = message;
+}
+
+export { applyTemplateToVillageAsync, isDimensionsCompatible, ApplyingException }

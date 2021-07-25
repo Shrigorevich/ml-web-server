@@ -33,7 +33,7 @@ function getTemplate() {
     return JSON.parse(localStorage.getItem(templateName));
 }
 
-function createVillage() {
+async function createVillage() {
 
     const villageName = $("#village_name").val();
 
@@ -47,7 +47,7 @@ function createVillage() {
                 body: JSON.stringify({ villageName })
             });
         } catch (error) {
-            console.log(error);
+            alert(error.message);
         }
     } else {
         alert("Village name must be at least 3 letters long")
@@ -70,8 +70,10 @@ async function applyTemplate() {
                 },
                 body: JSON.stringify({ template, villageName })
             });
-        } catch (error) {
 
+            alert("Template applied successfully");
+        } catch (error) {
+            alert("Something went wrong");
         }
     } else {
         alert("Bad values");

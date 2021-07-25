@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     const existingTemplate = await Template.findOne({ name: template.name });
 
     if (existingTemplate) {
-        await Template.deleteMany({ templateName: template.name });
+        await TemplateCell.deleteMany({ templateName: template.name });
         saveTemplateCellsAsync(cells, template.name)
             .then((values) => {
                 res.status(201).json({ message: "Success" });
@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
         });
         newTemplate.save()
             .then(() => {
-                getCellAsyncTaskList(cells, template.name)
+                saveTemplateCellsAsync(cells, template.name)
                     .then((values) => {
                         res.status(201).json({ message: "Success" });
                     })

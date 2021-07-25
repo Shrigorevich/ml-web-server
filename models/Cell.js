@@ -5,6 +5,6 @@ const schema = new mongoose.Schema({
    address: { type: mongoose.Mixed, required: true },
    type: { type: String, required: true },
    purpose: { type: String, required: true }
-})
+}, { collection: "cells" })
 
 export default mongoose.model('MatrixCell', schema);

@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
-   name: { type: String, required: true },
+   name: { type: String, unique: true, required: true },
    dimensionX: { type: Number, required: false },
    dimensionZ: { type: Number, required: false },
-   state: { type: String, default: "DRAFT", required: true }
-})
+   status: { type: String, default: "DRAFT", required: true }
+}, { collection: "villages" })
 
 export default mongoose.model('Village', schema);

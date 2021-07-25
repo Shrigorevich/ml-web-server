@@ -6,8 +6,8 @@ function saveTemplateCellsAsync(cells, templateName) {
 
     cells.forEach((cell) => {
         const newCell = new TemplateCell({
-            x: cell.x,
-            y: cell.y,
+            i: cell.i,
+            j: cell.j,
             purpose: cell.purpose,
             type: cell.type,
             templateName,
