@@ -56,4 +56,13 @@ router.post("/", async (req, res) => {
     }
 });
 
+router.delete("/:name", async (req, res) => {
+    const name = req.params.name;
+
+    await Template.deleteOne({ name });
+    await TemplateCell.deleteMany({ templateName: name });
+
+    res.sendStatus(204);
+});
+
 export default router;

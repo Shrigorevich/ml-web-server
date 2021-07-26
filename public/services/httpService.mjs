@@ -133,4 +133,25 @@ async function applyTemplate() {
     }
 }
 
-export { fetchTemplates, fetchVillages, applyTemplate, createVillage, saveTemplate }
+async function deleteTemplate() {
+    const templateName = $("#existing_templates").val();
+
+    if (templateName) {
+        try {
+            await fetch(`/api/templates/${templateName}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+
+            alert("Template deleted successfully");
+        } catch (error) {
+            alert("Something went wrong");
+        }
+    } else {
+        alert("Choose template first");
+    }
+}
+
+export { fetchTemplates, fetchVillages, applyTemplate, createVillage, saveTemplate, deleteTemplate }

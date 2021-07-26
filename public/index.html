@@ -30,15 +30,6 @@
                 </div>
             </div>
             <div class="form">
-                <h3>Load existing template</h3>
-                <div>
-                    <label for="existing_templates">Choose template</label>
-                    <select id="existing_templates"></select>
-                    <br>
-                    <button onclick="loadTemplate()">Load template</button>
-                </div>
-            </div>
-            <div class="form">
                 <h3>New cell characteristics</h3>
                 <dev class="form-input">
                     <label for="type">Type:</label>
@@ -63,7 +54,16 @@
                 <button onclick="clearCells()">Clear cells</button>
                 <br>
                 <br>
-
+            </div>
+            <div class="form">
+                <h3>Load existing template</h3>
+                <div>
+                    <label for="existing_templates">Choose template</label>
+                    <select id="existing_templates"></select>
+                    <br>
+                    <button onclick="loadTemplate()">Load</button>
+                    <button onclick="deleteTemplate()">Delete</button>
+                </div>
             </div>
             <div class="form">
                 <h3>Current cell characteristics</h3>
