@@ -1,5 +1,5 @@
 import Matrix from "./matrix.mjs";
-import { fetchTemplates, fetchVillages, applyTemplate, createVillage, saveTemplate, deleteTemplate } from "../services/httpService.mjs";
+import { fetchTemplates, fetchVillages, applyTemplate, createVillage, saveTemplate, deleteTemplate, deleteVillage } from "../services/httpService.mjs";
 
 var matrix;
 
@@ -57,4 +57,8 @@ window.saveTemplate = () => {
 
 window.deleteTemplate = () => {
     deleteTemplate();
+}
+
+window.deleteVillage = () => {
+    deleteVillage();
 }

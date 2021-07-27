@@ -218,9 +218,9 @@ class Matrix {
     storeTemplateCredential(template) {
         let savedTemplate = JSON.parse(localStorage.getItem(template.name));
         if (savedTemplate) {
-            savedTemplate.template = template;
+            savedTemplate.instance = template;
         } else {
-            localStorage.setItem(template.name, JSON.stringify({ template, cells: [] }));
+            localStorage.setItem(template.name, JSON.stringify({ instance: template, cells: [] }));
         }
     }
 

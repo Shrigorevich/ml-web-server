@@ -49,6 +49,8 @@ async function fetchVillages() {
     });
 
     $("#village_dropdown").html(dropDownOptions);
+
+    localStorage.setItem("villages", JSON.stringify(data.villages));
 }
 
 async function saveTemplate() {
@@ -64,7 +66,7 @@ async function saveTemplate() {
             alert("Create template first");
         } else {
             try {
-                const respons = await fetch("/api/templates", {
+                await fetch("/api/templates", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -112,9 +114,12 @@ async function applyTemplate() {
     const villageName = $("#village_dropdown").val();
     const templateName = $("#template_dropdown").val();
 
+    const villages = JSON.parse(localStorage.getItem("villages"));
+    const village = villages.find(v => v.name === villageName);
+
     const template = JSON.parse(localStorage.getItem(templateName));
 
-    if (villageName && template) {
+    if (village?.status === "LOCATED" && template) {
         try {
             const response = await fetch("/api/villages", {
                 method: "PUT",
@@ -154,4 +159,25 @@ async function deleteTemplate() {
     }
 }
 
-export { fetchTemplates, fetchVillages, applyTemplate, createVillage, saveTemplate, deleteTemplate }
+async function deleteVillage() {
+    const villageName = $("#village_dropdown").val();
+
+    if (villageName) {
+        try {
+            await fetch(`/api/villages/${villageName}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+
+            alert("Village deleted successfully");
+        } catch (error) {
+            alert("Something went wrong");
+        }
+    } else {
+        alert("Choose village first");
+    }
+}
+
+export { fetchTemplates, fetchVillages, applyTemplate, createVillage, saveTemplate, deleteTemplate, deleteVillage }
